@@ -77,3 +77,5 @@ Never commit database passwords, AWS access keys, private keys, `.env`, or `/etc
 Deployment verification: Launch Template v4 uses AWS Systems Manager Parameter Store for runtime database secret retrieval.
 
 Monitoring deployment: Launch Template v5 includes CloudWatch Agent memory monitoring with secure Parameter Store secret retrieval.
+
+Deployment retry marker: SSM VPC endpoint connectivity enabled for runtime Parameter Store retrieval.
