@@ -1,0 +1,18 @@
+{
+  "name": "ibm-ecommerce-cloud-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Highly Available Cloud-Native E-Commerce Platform on AWS",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "check": "node --check app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
