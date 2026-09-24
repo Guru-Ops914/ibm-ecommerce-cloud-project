@@ -73,3 +73,5 @@ The implementation avoids a NAT Gateway, uses small EC2/RDS resources, limits AS
 ## Repository Security
 
 Never commit database passwords, AWS access keys, private keys, `.env`, or `/etc/ecommerce.env`.
+
+Deployment verification: Launch Template v4 uses AWS Systems Manager Parameter Store for runtime database secret retrieval.
