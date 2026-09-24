@@ -79,3 +79,5 @@ Deployment verification: Launch Template v4 uses AWS Systems Manager Parameter S
 Monitoring deployment: Launch Template v5 includes CloudWatch Agent memory monitoring with secure Parameter Store secret retrieval.
 
 Deployment retry marker: SSM VPC endpoint connectivity enabled for runtime Parameter Store retrieval.
+
+Deployment retry marker: corrected EC2 S3 read permission for deployment artifact.
