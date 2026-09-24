@@ -1,4 +1,4 @@
-name: Node.js CI + AWS OIDC
+name: Node.js CI + AWS OIDC + ASG Deploy
 
 on:
   push:
@@ -28,20 +28,11 @@ jobs:
       - name: Validate JavaScript
         run: npm run check
 
-  aws-auth:
+  deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-          role-session-name: GitHubActions-IBM-Ecommerce
-
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
       - name: Checkout source
         uses: actions/checkout@v4
 
@@ -56,5 +47,34 @@ jobs:
       - name: Create deployment package
         run: tar -czf ecommerce-app.tar.gz app.js package.json node_modules
 
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: GitHubActions-IBM-Ecommerce
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
       - name: Upload deployment package to S3
         run: aws s3 cp ecommerce-app.tar.gz s3://${{ vars.DEPLOY_BUCKET }}/deployments/ecommerce-app.tar.gz
+
+      - name: Start rolling ASG deployment
+        id: refresh
+        run: |
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name IBM-Ecommerce-ASG \
+            --preferences '{"MinHealthyPercentage":50,"InstanceWarmup":300}' \
+            --query 'InstanceRefreshId' \
+            --output text)
+          echo "refresh_id=$REFRESH_ID" >> "$GITHUB_OUTPUT"
+          echo "Started instance refresh: $REFRESH_ID"
+
+      - name: Show deployment status
+        run: |
+          aws autoscaling describe-instance-refreshes \
+            --auto-scaling-group-name IBM-Ecommerce-ASG \
+            --instance-refresh-ids "${{ steps.refresh.outputs.refresh_id }}" \
+            --query 'InstanceRefreshes[0].[Status,PercentageComplete,InstancesToUpdate]' \
+            --output table
