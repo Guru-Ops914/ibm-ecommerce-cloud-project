@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js CI + AWS OIDC
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   validate:
@@ -26,3 +27,18 @@ jobs:
 
       - name: Validate JavaScript
         run: npm run check
+
+  aws-auth:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: GitHubActions-IBM-Ecommerce
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
