@@ -34,6 +34,10 @@ app.get('/products', async (req, res) => {
 
 app.get('/health', (req, res) => res.status(200).send('healthy'));
 
+app.get('/test-error', (req, res) => {
+  res.status(500).json({ error: 'Intentional monitoring test' });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`E-Commerce application running on port ${PORT}`);
 });
